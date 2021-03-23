@@ -1,4 +1,5 @@
-# Txbit 
+# Txbit [![Build Status](https://travis-ci.com/AD-Ventures/txbit.svg?branch=main)](https://travis-ci.com/AD-Ventures/txbit)
+
 
 A Python3 wrapper for the Txbit API
 
