@@ -1,0 +1,34 @@
+language: python
+jobs:  
+  include:
+  - name: "Linux"
+    os: linux
+    python:
+      - "3.4"
+      - "3.8"
+      - "nightly"
+      - "pypy3"
+    before_install:
+      pip3 install requests
+    install:
+      pip3 install .
+  - name: "MacOS"
+    language: shell
+    os: osx
+    osx_image: xcode11.2
+    before_install:
+      pip3 install requests
+    install:
+      pip3 install .
+  - name: "Windows"
+    language: shell
+    os: windows
+    before_install:
+      - choco install python --version 3.8.0
+      - python -m pip install --upgrade pip
+      - pip3 install requests
+    env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+    install:
+      pip3 install .
+
+script: python3 txbit/tests/test.py || python txbit/tests/test.py
