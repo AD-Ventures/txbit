@@ -43,17 +43,17 @@ class Txbit:
     ## PUBLIC FUNCTIONS ---------------
     def getMarkets():
         res = Txbit.request('public/getmarkets')
-        result = { m['MarketCurrency']: m for m in res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { m['MarketCurrency']: m for m in res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencies():
         res = Txbit.request('public/getcurrencies')
-        result = { m['Currency']: m for m in res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { m['Currency']: m for m in res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getMarketSummaries():
         res = Txbit.request('public/getmarketsummaries')
-        result = { m['MarketName']: m for m in res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { m['MarketName']: m for m in res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getExchangePairs():
@@ -64,36 +64,36 @@ class Txbit:
     def getOrderBook(market, bookType='both'):
         params = { 'market': market, 'type': bookType}
         res = Txbit.request('public/getorderbook', params)
-        result = { market: res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { market: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getTicker(market):
         params = { 'market': market}
         res = Txbit.request('public/getticker', params)
-        result = { market: res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { market: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getMarketHistory(market):
         params = { 'market': market}
         res = Txbit.request('public/getmarkethistory', params)
-        result = { market: res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { market: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getSystemStatus():
         res = Txbit.request('public/getsystemstatus')
-        result = { 'status': res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { 'status': res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencyInformation(currency):
         params = { 'currency': currency}
         res = Txbit.request('public/getcurrencyinformation', params)
-        result = { currency: res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { currency: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencyBalanceSheet(currency):
         params = { 'currency': currency}
         res = Txbit.request('public/getcurrencybalancesheet', params)
-        result = { currency: res.json()['result'] } if res.json()['success'] else res.status_code
+        result = { currency: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
 
@@ -126,12 +126,12 @@ class Txbit:
     def getBalances(self):
         path = 'account/getbalances'
         res = self.authenticatedRequest(path)
-        result = res.json()['result'] if res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getBalanceFor(self, currency):
         path = 'account/getbalance'
         params = { 'currency': currency }
         res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
