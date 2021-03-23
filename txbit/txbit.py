@@ -86,13 +86,13 @@ class Txbit:
 
     def getCurrencyInformation(currency):
         params = { 'currency': currency}
-        res = Txbit.request('public/getcurrencyinformation')
+        res = Txbit.request('public/getcurrencyinformation', params)
         result = { currency: res.json()['result'] } if res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencyBalanceSheet(currency):
         params = { 'currency': currency}
-        res = Txbit.request('public/getcurrencybalancesheet')
+        res = Txbit.request('public/getcurrencybalancesheet', params)
         result = { currency: res.json()['result'] } if res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 

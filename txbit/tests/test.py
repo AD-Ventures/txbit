@@ -66,7 +66,17 @@ class TestTxbit(unittest.TestCase):
         res = Txbit.getMarketHistory('BAN/BTC')
         self.assertTrue(res.success)
 
+    def test_getSystemStatus(self):
+        res = Txbit.getSystemStatus()
+        self.assertTrue(res.success)
 
+    def test_getCurrencyInformation(self):
+        res = Txbit.getCurrencyInformation('BTC')
+        self.assertTrue(res.success)
+
+    def test_getCurrencyBalanceSheet(self):
+        res = Txbit.getCurrencyBalanceSheet('BTC')
+        self.assertTrue(res.success)
 
 if __name__ == '__main__':
     unittest.main()
