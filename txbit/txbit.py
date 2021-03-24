@@ -41,6 +41,7 @@ class Txbit:
         return requests.get(url)
 
     ## PUBLIC FUNCTIONS ---------------
+
     def getMarkets():
         res = Txbit.request('public/getmarkets')
         result = { m['MarketCurrency']: m for m in res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
@@ -95,18 +96,6 @@ class Txbit:
         res = Txbit.request('public/getcurrencybalancesheet', params)
         result = { currency: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
-
-
-    ## MARKET FUNCTIONS ---------------
-    '''
-    --- TODO --- Outstanding Market Functions
-    /account/getdepositaddress
-    /account/withdraw
-    /account/getorder
-    /account/getorderhistory
-    /account/getwithdrawalhistory
-    /account/getdeposithistory
-    '''
 
     ## ACOUNT FUNCTIONS ---------------
 
@@ -189,6 +178,40 @@ class Txbit:
 
         if currency is not None:
             params['currency'] = currency
+
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    ## MARKET FUNCTIONS ---------------
+
+    def buyLimit(self, market, quantity, rate):
+        path = 'market/buylimit'
+        params = { 'market': market, 'quantity': quantity, 'rate': rate }
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def sellLimit(self, market, quantity, rate):
+        path = 'market/selllimit'
+        params = { 'market': market, 'quantity': quantity, 'rate': rate }
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def cancel(self, uuid):
+        path = 'market/cancel'
+        params = { 'uuic': uuic }
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def getOpenOrders(self, market = None):
+        path = 'getopenorders'
+        params = { }
+
+        if market is not None:
+            params['market'] = market
 
         res = self.authenticatedRequest(path, params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
