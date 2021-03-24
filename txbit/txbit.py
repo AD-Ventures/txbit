@@ -135,3 +135,61 @@ class Txbit:
         res = self.authenticatedRequest(path, params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def getDepositAddress(self, currency):
+        path = 'account/getdepositaddress'
+        params = { 'currency': currency }
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def withdraw(self, currency, quantity, address, paymentid = None):
+        path = 'account/withdraw'
+        params = { 'currency': currency, 'quantity': quantity, 'address': address }
+
+        if paymentid is not None:
+            params['paymentid'] = paymentid
+
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def getOrder(self, uuid):
+        path = 'account/getorder'
+        params = { 'uuid': uuid }
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def getOrderHistory(self, market = None):
+        path = 'account/getorderhistory'
+        params = {}
+
+        if market is not None:
+            params['market'] = market
+
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def getWithdrawlHistory(self, currency = None):
+        path = 'account/getwithdrawalhistory'
+        params = { }
+
+        if currency is not None:
+            params['currency'] = currency
+
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
+
+    def getDepositHistory(self, currency = None):
+        path = 'account/getdeposithistory'
+        params = { }
+
+        if currency is not None:
+            params['currency'] = currency
+
+        res = self.authenticatedRequest(path, params)
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
+        return TxbitResponse(res.ok and res.json()['success'], "", result)
