@@ -1,4 +1,4 @@
-# Txbit [![Build Status](https://travis-ci.com/AD-Ventures/txbit.svg?branch=main)](https://travis-ci.com/AD-Ventures/txbit) [![Python Version](https://img.shields.io/badge/python-3.4%2B-green)]()
+# Txbit [![Build Status](https://travis-ci.com/AD-Ventures/txbit.svg?branch=main)](https://travis-ci.com/AD-Ventures/txbit) [![Python Version](https://img.shields.io/badge/python-3.4%2B-green)]() [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/AD-Ventures/txbit/blob/main/LICENSE)
 
 
 A Python3 wrapper for the Txbit API
