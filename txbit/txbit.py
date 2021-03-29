@@ -2,7 +2,6 @@ import hashlib
 import hmac
 import json
 import requests
-import urllib.parse
 
 from time import time
 
@@ -44,57 +43,57 @@ class Txbit:
 
     def getMarkets():
         res = Txbit.request('public/getmarkets')
-        result = { m['MarketCurrency']: m for m in res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencies():
         res = Txbit.request('public/getcurrencies')
-        result = { m['Currency']: m for m in res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getMarketSummaries():
         res = Txbit.request('public/getmarketsummaries')
-        result = { m['MarketName']: m for m in res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getExchangePairs():
         res = Txbit.getMarketSummaries()
-        res.result = [res.result[m]['MarketName'] for m in res.result]
+        res.result = [pair['MarketName'] for pair in res.result]
         return res
 
     def getOrderBook(market, bookType='both'):
-        params = { 'market': market, 'type': bookType}
+        params = {'market': market, 'type': bookType}
         res = Txbit.request('public/getorderbook', params)
-        result = { market: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getTicker(market):
-        params = { 'market': market}
+        params = {'market': market}
         res = Txbit.request('public/getticker', params)
-        result = { market: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getMarketHistory(market):
-        params = { 'market': market}
+        params = {'market': market}
         res = Txbit.request('public/getmarkethistory', params)
-        result = { market: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getSystemStatus():
         res = Txbit.request('public/getsystemstatus')
-        result = { 'status': res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencyInformation(currency):
-        params = { 'currency': currency}
+        params = {'currency': currency}
         res = Txbit.request('public/getcurrencyinformation', params)
-        result = { currency: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencyBalanceSheet(currency):
-        params = { 'currency': currency}
+        params = {'currency': currency}
         res = Txbit.request('public/getcurrencybalancesheet', params)
-        result = { currency: res.json()['result'] } if res.ok and res.json()['success'] else res.status_code
+        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     ## ACOUNT FUNCTIONS ---------------
@@ -134,7 +133,7 @@ class Txbit:
 
     def withdraw(self, currency, quantity, address, paymentid = None):
         path = 'account/withdraw'
-        params = { 'currency': currency, 'quantity': quantity, 'address': address }
+        params = {'currency': currency, 'quantity': quantity, 'address': address}
 
         if paymentid is not None:
             params['paymentid'] = paymentid
@@ -187,28 +186,28 @@ class Txbit:
 
     def buyLimit(self, market, quantity, rate):
         path = 'market/buylimit'
-        params = { 'market': market, 'quantity': quantity, 'rate': rate }
+        params = {'market': market, 'quantity': quantity, 'rate': rate}
         res = self.authenticatedRequest(path, params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def sellLimit(self, market, quantity, rate):
         path = 'market/selllimit'
-        params = { 'market': market, 'quantity': quantity, 'rate': rate }
+        params = {'market': market, 'quantity': quantity, 'rate': rate}
         res = self.authenticatedRequest(path, params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def cancel(self, uuid):
         path = 'market/cancel'
-        params = { 'uuic': uuic }
+        params = {'uuic': uuic}
         res = self.authenticatedRequest(path, params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getOpenOrders(self, market = None):
         path = 'getopenorders'
-        params = { }
+        params = {}
 
         if market is not None:
             params['market'] = market
