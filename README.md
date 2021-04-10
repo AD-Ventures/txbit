@@ -20,11 +20,12 @@ markets = Txbit.getMarketSummaries().result
 
 order = Txbit.getOrderBook('ETH/BTC').result
 
-# market and account functions (require APIKEY/Secret)
+# authenticated market and account functions (require APIKEY/Secret)
 t = Txbit(APIKEY, SECRET)
 
 request = t.getBalance()
 
+# check if the API request was successful
 if request.success:
     balance = request.result
 ```
