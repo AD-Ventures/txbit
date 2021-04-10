@@ -36,7 +36,7 @@ class Txbit:
     Methods
     -------
     expandPathToUrl(path, params={}):
-       adds onto the base url for specific methods 
+       adds onto the base url for specific methods
     request(path, params={}):
         uses `expandPathToUrl()` to make the API call
     authenticatedRequest(path, params={})
@@ -132,65 +132,65 @@ class Txbit:
     ## PUBLIC FUNCTIONS ---------------
 
     def getMarkets():
-        """get the open and available trading markets along with other meta data"""
+        """(P) get the open and available trading markets along with other meta data"""
         res = Txbit.request('public/getmarkets')
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencies():
-        """get all supported assets along with other meta data"""
+        """(P) get all supported assets along with other meta data"""
         res = Txbit.request('public/getcurrencies')
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getMarketSummaries():
-        """get the last 24 hour summary of all active markets"""
+        """(P) get the last 24 hour summary of all active markets"""
         res = Txbit.request('public/getmarketsummaries')
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getExchangePairs():
-        """get list of all pairs that form markets"""
+        """(P) get list of all pairs that form markets"""
         res = Txbit.getMarketSummaries()
         res.result = [pair['MarketName'] for pair in res.result]
         return res
 
     def getSystemStatus():
-        """get the system related status for all currencies"""
+        """(P) get the system related status for all currencies"""
         res = Txbit.request('public/getsystemstatus')
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getOrderBook(market, bookType='both'):
-        """get the orderbook for a given market"""
+        """(P) get the orderbook for a given market"""
         params = {'market': market, 'type': bookType}
         res = Txbit.request('public/getorderbook', params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getTicker(market):
-        """get current tick values for a market"""
+        """(P) get current tick values for a market"""
         params = {'market': market}
         res = Txbit.request('public/getticker', params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getMarketHistory(market):
-        """get the latest trades that have occurred for a specific market"""
+        """(P) get the latest trades that have occurred for a specific market"""
         params = {'market': market}
         res = Txbit.request('public/getmarkethistory', params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencyInformation(currency):
-        """get specific information and metadata about the listed currency"""
+        """(P) get specific information and metadata about the listed currency"""
         params = {'currency': currency}
         res = Txbit.request('public/getcurrencyinformation', params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getCurrencyBalanceSheet(currency):
-        """get solvency information for listed currencies"""
+        """(P) get solvency information for listed currencies"""
         params = {'currency': currency}
         res = Txbit.request('public/getcurrencybalancesheet', params)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
@@ -199,14 +199,14 @@ class Txbit:
     ## ACOUNT FUNCTIONS ---------------
 
     def getBalances(self):
-        """get all balances from your account"""
+        """(A) get all balances from your account"""
         path = 'account/getbalances'
         res = self.authenticatedRequest(path)
         result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getBalanceFor(self, currency):
-        """get the balance from your account for a specific asset"""
+        """(A) get the balance from your account for a specific asset"""
         path = 'account/getbalance'
         params = {'currency': currency}
         res = self.authenticatedRequest(path, params)
@@ -214,7 +214,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getDepositAddress(self, currency):
-        """get or generate an address for a specific currency
+        """(A) get or generate an address for a specific currency
 
         Notes
         -----
@@ -227,7 +227,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def withdraw(self, currency, quantity, address, paymentid=None):
-        """withdraw funds from your account
+        """(A) withdraw funds from your account
 
         Notes
         -----
@@ -244,7 +244,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getOrder(self, uuid):
-        """get a single order by uuid"""
+        """(A) get a single order by uuid"""
         path = 'account/getorder'
         params = {'uuid': uuid}
         res = self.authenticatedRequest(path, params)
@@ -252,7 +252,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getOrderHistory(self, market=None):
-        """get your order history"""
+        """(A) get your order history"""
         path = 'account/getorderhistory'
         params = {}
 
@@ -264,7 +264,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getWithdrawlHistory(self, currency=None):
-        """get your withdrawal history"""
+        """(A) get your withdrawal history"""
         path = 'account/getwithdrawalhistory'
         params = {}
 
@@ -276,7 +276,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getDepositHistory(self, currency=None):
-        """get your deposit history"""
+        """(A) get your deposit history"""
         path = 'account/getdeposithistory'
         params = {}
 
@@ -290,7 +290,7 @@ class Txbit:
     ## MARKET FUNCTIONS ---------------
 
     def buyLimit(self, market, quantity, rate):
-        """place a Buy Limit order in a specific market"""
+        """(M) place a Buy Limit order in a specific market"""
         path = 'market/buylimit'
         params = {'market': market, 'quantity': quantity, 'rate': rate}
         res = self.authenticatedRequest(path, params)
@@ -298,7 +298,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def sellLimit(self, market, quantity, rate):
-        """place a Sell Limit order in a specific market"""
+        """(M) place a Sell Limit order in a specific market"""
         path = 'market/selllimit'
         params = {'market': market, 'quantity': quantity, 'rate': rate}
         res = self.authenticatedRequest(path, params)
@@ -306,7 +306,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def cancel(self, uuid):
-        """cancel a buy or sell order"""
+        """(M) cancel a buy or sell order"""
         path = 'market/cancel'
         params = {'uuic': uuic}
         res = self.authenticatedRequest(path, params)
@@ -314,7 +314,7 @@ class Txbit:
         return TxbitResponse(res.ok and res.json()['success'], "", result)
 
     def getOpenOrders(self, market=None):
-        """get all orders that you currently have opened"""
+        """(M) get all orders that you currently have opened"""
         path = 'getopenorders'
         params = {}
 
