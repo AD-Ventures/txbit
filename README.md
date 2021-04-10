@@ -11,6 +11,24 @@ pip3 install txbit
 
 ## Usage
 
+```python
+from txbit import Txbit
+from secrets import APIKEY, SECRET  # api key and secret
+
+# public functions (no APIKEY/Secret needed)
+markets = Txbit.getMarketSummaries().result
+
+order = Txbit.getOrderBook('ETH/BTC').result
+
+# market and account functions (require APIKEY/Secret)
+t = Txbit(APIKEY, SECRET)
+
+request = t.getBalance()
+
+if request.success:
+    balance = request.result
+```
+
 ## Support
 
 For any help or questions, please open an issue on GitHub.
