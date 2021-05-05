@@ -1,6 +1,5 @@
-from .txbit import PublicClient, AuthenticatedClient
+from .txbit import Txbit
 
 __all__ = [
-  'PublicClient',
-  'AuthenticatedClient'
+  'Txbit',
 ]
