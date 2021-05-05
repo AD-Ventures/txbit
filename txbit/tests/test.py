@@ -74,5 +74,9 @@ class TestTxbit(unittest.TestCase):
         res = self.txbit.getCurrencyBalanceSheet('BTC')
         self.assertTrue(res.success)
 
+    def test_auth(self):
+        with self.assertRaises(ValueError):
+            self.txbit.getBalances()
+
 if __name__ == '__main__':
     unittest.main()
