@@ -39,11 +39,11 @@ class Txbit:
 
     Methods
     -------
-    __expandPathToUrl__(path, params={}):
+    _expandPathToUrl(path, params={}):
        adds onto the base url for specific methods
-    __publicRequest__(path, params={}):
+    _publicRequest(path, params={}):
        public call for Public Methods
-    __athenticatedRequest__(path, params={}):
+    _athenticatedRequest(path, params={}):
        authenticated call with APIKey and Secret for Market and Account methods
 
     Notes
@@ -57,26 +57,22 @@ class Txbit:
         self.APIKey = APIKey
         self.Secret = Secret
 
-    def __expandPathToUrl__(self, path, params={}):
+    def _expandPathToUrl(self, path, params={}):
         """adds onto the base url for specific methods"""
         url = self.endpoint + path
         url += '?' if params else ''
+        return url + '&'.join([key + '=' + str(params[key]) for key in params])
 
-        for key in params:
-            url += key + '=' + params[key] + '&'
-
-        return url
-
-    def __publicRequest__(self, path, params={}):
+    def _publicRequest(self, path, params={}):
         """public call for Public Methods"""
-        url = self.__expandPathToUrl__(path, params)
+        url = self._expandPathToUrl(path, params)
         res = requests.get(url)
 
         return TxbitResponse(res.ok and res.json()['success'],
                              res.json()['message'],
                              res.json()['result'])
 
-    def __authenticatedRequest__(self, path, params={}):
+    def _authenticatedRequest(self, path, params={}):
         """authenticated call with APIKey and Secret for Market and Account methods"""
         if self.APIKey is None or self.Secret is None:
             raise ValueError('APIKey and Secret must be supplied to use this methods')
@@ -84,7 +80,7 @@ class Txbit:
         params['apikey'] = self.APIKey
         params['nonce'] = str(int(time()))
 
-        url = self.__expandPathToUrl__(path, params)
+        url = self._expandPathToUrl(path, params)
         apisign = hmac.new(bytes(self.Secret, 'utf-8'),
                            bytes(url, 'utf-8'),
                            hashlib.sha512).hexdigest().upper()
@@ -100,66 +96,66 @@ class Txbit:
 
     def getMarkets(self):
         """get the open and available trading markets along with other meta data"""
-        return self.__publicRequest__('public/getmarkets')
+        return self._publicRequest('public/getmarkets')
 
     def getCurrencies(self):
         """get all supported assets along with other meta data"""
-        return self.__publicRequest__('public/getcurrencies')
+        return self._publicRequest('public/getcurrencies')
 
     def getTicker(self, market):
         """get current tick values for a market"""
         params = {'market': market}
-        return self.__publicRequest__('public/getticker', params)
+        return self._publicRequest('public/getticker', params)
 
     def getMarketSummaries(self):
         """get the last 24 hour summary of all active markets"""
-        return self.__publicRequest__('public/getmarketsummaries')
+        return self._publicRequest('public/getmarketsummaries')
 
     def getMarketSummary(self, market):
         """get the last 24 hour summary of a specific market"""
         params = {'market': market}
-        return self.__publicRequest__('public/getmarketsummary', params)
+        return self._publicRequest('public/getmarketsummary', params)
 
     def getOrderBook(self, market, bookType='both'):
         """get the orderbook for a given market"""
         params = {'market': market, 'type': bookType}
-        return self.__publicRequest__('public/getorderbook', params)
+        return self._publicRequest('public/getorderbook', params)
 
     def getMarketHistory(self, market):
         """get the latest trades that have occurred for a specific market"""
         params = {'market': market}
-        return self.__publicRequest__('public/getmarkethistory', params)
+        return self._publicRequest('public/getmarkethistory', params)
 
     def getSystemStatus(self):
         """get the system related status for all currencies"""
-        return self.__publicRequest__('public/getsystemstatus')
+        return self._publicRequest('public/getsystemstatus')
 
     def getCurrencyInformation(self, currency):
         """get specific information and metadata about the listed currency"""
         params = {'currency': currency}
-        return self.__publicRequest__('public/getcurrencyinformation', params)
+        return self._publicRequest('public/getcurrencyinformation', params)
 
     def getCurrencyBalanceSheet(self, currency):
         """get solvency information for listed currencies"""
         params = {'currency': currency}
-        return self.__publicRequest__('public/getcurrencybalancesheet', params)
+        return self._publicRequest('public/getcurrencybalancesheet', params)
 
     ## MARKET FUNCTIONS ---------------
 
     def buyLimit(self, market, quantity, rate):
         """place a Buy Limit order in a specific market"""
         params = {'market': market, 'quantity': quantity, 'rate': rate}
-        return self.__authenticatedRequest__('market/buylimit', params)
+        return self._authenticatedRequest('market/buylimit', params)
 
     def sellLimit(self, market, quantity, rate):
         """place a Sell Limit order in a specific market"""
         params = {'market': market, 'quantity': quantity, 'rate': rate}
-        return self.__authenticatedRequest__('market/selllimit', params)
+        return self._authenticatedRequest('market/selllimit', params)
 
     def cancel(self, uuid):
         """cancel a buy or sell order"""
         params = {'uuic': uuic}
-        return self.__authenticatedRequest__('market/cancel', params)
+        return self._authenticatedRequest('market/cancel', params)
 
     def getOpenOrders(self, market=None):
         """get all orders that you currently have opened"""
@@ -168,18 +164,18 @@ class Txbit:
         if market is not None:
             params['market'] = market
 
-        return self.__authenticatedRequest__('market/getopenorders', params)
+        return self._authenticatedRequest('market/getopenorders', params)
 
     ## ACOUNT FUNCTIONS ---------------
 
     def getBalances(self):
         """get all balances from your account"""
-        return self.__authenticatedRequest__('account/getbalances')
+        return self._authenticatedRequest('account/getbalances')
 
     def getBalance(self, currency):
         """get the balance from your account for a specific asset"""
         params = {'currency': currency}
-        return self.__authenticatedRequest__('account/getbalance', params)
+        return self._authenticatedRequest('account/getbalance', params)
 
     def getDepositAddress(self, currency):
         """get or generate an address for a specific currency
@@ -189,7 +185,7 @@ class Txbit:
         will return ADDRESS_GENERATING until one is available
         """
         params = {'currency': currency}
-        return self.__authenticatedRequest__('account/getdepositaddress', params)
+        return self._authenticatedRequest('account/getdepositaddress', params)
 
     def withdraw(self, currency, quantity, address, paymentid=None):
         """withdraw funds from your account
@@ -203,12 +199,12 @@ class Txbit:
         if paymentid is not None:
             params['paymentid'] = paymentid
 
-        return self.__authenticatedRequest__('account/withdraw', params)
+        return self._authenticatedRequest('account/withdraw', params)
 
     def getOrder(self, uuid):
         """get a single order by uuid"""
         params = {'uuid': uuid}
-        return self.__authenticatedRequest__('account/getorder', params)
+        return self._authenticatedRequest('account/getorder', params)
 
     def getOrderHistory(self, market=None):
         """get your order history"""
@@ -217,7 +213,7 @@ class Txbit:
         if market is not None:
             params['market'] = market
 
-        return self.__authenticatedRequest__('account/getorderhistory', params)
+        return self._authenticatedRequest('account/getorderhistory', params)
 
     def getWithdrawlHistory(self, currency=None):
         """get your withdrawal history"""
@@ -226,7 +222,7 @@ class Txbit:
         if currency is not None:
             params['currency'] = currency
 
-        return self.__authenticatedRequest__('account/getwithdrawalhistory', params)
+        return self._authenticatedRequest('account/getwithdrawalhistory', params)
 
     def getDepositHistory(self, currency=None):
         """get your deposit history"""
@@ -235,4 +231,4 @@ class Txbit:
         if currency is not None:
             params['currency'] = currency
 
-        return self.__authenticatedRequest__('account/getdeposithistory', params)
+        return self._authenticatedRequest('account/getdeposithistory', params)
