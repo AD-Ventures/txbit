@@ -1,82 +1,76 @@
-from txbit import Txbit, TxbitResponse
+from txbit import Txbit
 import unittest
 
 class TestTxbit(unittest.TestCase):
-#     def test_error(self):
-#         with self.assertRaises(TypeError):
-#             call_error_function()
-
     endpoint = 'https://api.txbit.io/api/'
+    txbit = Txbit()
 
     def test_endpoint(self):
-        self.assertEqual(self.endpoint, Txbit.endpoint)
+        self.assertEqual(self.endpoint, self.txbit.endpoint)
 
     def test_expandPathToUrl(self):
         path = 'test/case'
-        url = Txbit.expandPathToUrl(path)
+        url = self.txbit._expandPathToUrl(path)
         self.assertEqual(url, self.endpoint + path)
 
     def test_expandPathToUrl_params(self):
         path = 'test/case'
-        params = {
-            'param1': 'test1',\
-            'param2': 'test2'\
-        }
-        url = Txbit.expandPathToUrl(path, params)
+        params = {'param1': 'test1'}
+        url = self.txbit._expandPathToUrl(path, params)
 
-        expected_url = self.endpoint + path + '?'
-
-        for key in params:
-            expected_url += key + "=" + params[key] + "&"
+        expected_url = 'https://api.txbit.io/api/test/case?param1=test1'
 
         self.assertEqual(url, expected_url)
 
-    def test_request_bad(self):
-        path = 'test/case'
-        res = Txbit.request(path)
-
-        self.assertFalse(res.ok)
-        self.assertEqual(404, res.status_code)
-
     def test_getMarkets(self):
-        res = Txbit.getMarkets()
+        res = self.txbit.getMarkets()
         self.assertTrue(res.success)
 
     def test_getCurrencies(self):
-        res = Txbit.getCurrencies()
-        self.assertTrue(res.success)
-
-    def test_getMarketSummaries(self):
-        res = Txbit.getMarketSummaries()
-        self.assertTrue(res.success)
-
-    def test_getExchangePairs(self):
-        res = Txbit.getExchangePairs()
-        self.assertTrue(res.success)
-
-    def test_getOrderBook(self):
-        res = Txbit.getOrderBook('BAN/BTC')
+        res = self.txbit.getCurrencies()
         self.assertTrue(res.success)
 
     def test_getTicker(self):
-        res = Txbit.getTicker('BAN/BTC')
+        res = self.txbit.getTicker('BAN/BTC')
+        self.assertTrue(res.success)
+
+    def test_getTicker_bad(self):
+        res = self.txbit.getTicker('BAN')
+
+        self.assertFalse(res.success)
+        self.assertEqual("INVALID_MARKET", res.message)
+
+    def test_getMarketSummaries(self):
+        res = self.txbit.getMarketSummaries()
+        self.assertTrue(res.success)
+
+    def test_getMarketSummary(self):
+        res = self.txbit.getMarketSummary('BAN/BTC')
+        self.assertTrue(res.success)
+
+    def test_getOrderBook(self):
+        res = self.txbit.getOrderBook('BAN/BTC')
         self.assertTrue(res.success)
 
     def test_getMarketHistory(self):
-        res = Txbit.getMarketHistory('BAN/BTC')
+        res = self.txbit.getMarketHistory('BAN/BTC')
         self.assertTrue(res.success)
 
     def test_getSystemStatus(self):
-        res = Txbit.getSystemStatus()
+        res = self.txbit.getSystemStatus()
         self.assertTrue(res.success)
 
     def test_getCurrencyInformation(self):
-        res = Txbit.getCurrencyInformation('BTC')
+        res = self.txbit.getCurrencyInformation('BTC')
         self.assertTrue(res.success)
 
     def test_getCurrencyBalanceSheet(self):
-        res = Txbit.getCurrencyBalanceSheet('BTC')
+        res = self.txbit.getCurrencyBalanceSheet('BTC')
         self.assertTrue(res.success)
+
+    def test_auth(self):
+        with self.assertRaises(ValueError):
+            self.txbit.getBalances()
 
 if __name__ == '__main__':
     unittest.main()
