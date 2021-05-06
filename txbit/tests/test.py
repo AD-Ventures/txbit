@@ -15,13 +15,10 @@ class TestTxbit(unittest.TestCase):
 
     def test_expandPathToUrl_params(self):
         path = 'test/case'
-        params = {
-            'param1': 'test1',\
-            'param2': 'test2'\
-        }
+        params = {'param1': 'test1'}
         url = self.txbit._expandPathToUrl(path, params)
 
-        expected_url = 'https://api.txbit.io/api/test/case?param1=test1&param2=test2'
+        expected_url = 'https://api.txbit.io/api/test/case?param1=test1'
 
         self.assertEqual(url, expected_url)
 
