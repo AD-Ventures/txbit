@@ -1,6 +1,5 @@
-from .txbit import Txbit, TxbitResponse
+from .txbit import Txbit
 
 __all__ = [
   'Txbit',
-  'TxbitResponse'
 ]

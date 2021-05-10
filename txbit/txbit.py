@@ -5,9 +5,12 @@ import json
 
 import requests
 
+
 from time import time
 
+
 class TxbitResponse:
+    """A class to handle responses from calls to the Txbit API"""
     def __init__(self, success, message, result):
         self.success = success
         self.message = message
@@ -21,8 +24,9 @@ class TxbitResponse:
         }
         return str(json.dumps(d, indent = 4))
 
+
 class Txbit:
-    """A class to interact with the Txbit.io API
+    """A class to interact with the Txbit API
 
     Attributes
     ----------
@@ -35,292 +39,196 @@ class Txbit:
 
     Methods
     -------
-    expandPathToUrl(path, params={}):
+    _expandPathToUrl(path, params={}):
        adds onto the base url for specific methods
-    request(path, params={}):
-        uses `expandPathToUrl()` to make the API call
-    authenticatedRequest(path, params={})
-        authenticated API call with APIKey and Secret for Market and Account methods
-    getMarkets():
-        get the open and available trading markets along with other meta data
-    getCurrencies():
-        get all supported assets along with other meta data
-    getMarketSummaries():
-        get the last 24 hour summary of all active markets
-    getExchangePairs():
-        get list of all pairs that form markets
-    getSystemStatus():
-        get the system related status for all currencies
-    getOrderBook(market, bookType='both'):
-        get the orderbook for a given market
-    getTicker(market):
-        get current tick values for a market
-    getMarketHistory(market):
-        get the latest trades that have occurred for a specific market
-    getCurrencyInformation(currency):
-        get specific information and metadata about the listed currency
-    getCurrencyBalanceSheet(currency):
-        get solvency information for listed currencies
-    getBalances():
-        get all balances from your account
-    getBalanceFor(currency):
-        get the balance from your account for a specific asset
-    getDepositAddress(currency):
-        get or generate an address for a specific currency
-    withdraw(currency, quantity, address, paymentid=None):
-        withdraw funds from your account
-    getOrder(uuic):
-        get a single order by uuid
-    getOrderHistory(market):
-        get your order history
-    getWithdrawlHistory(currency):
-        get your withdrawal history
-    getDepositHistory(currency):
-        get your deposit history
-    butLimit(market, quantity, rate):
-        place a Buy Limit order in a specific market
-    sellLimit(market, quantity, rate):
-        place a Sell Limit order in a specific market
-    cancel(uuid):
-        cancel a buy or sell order
-    getOpenOrders(market):
-        get all orders that you currently have opened
+    _publicRequest(path, params={}):
+       public call for Public Methods
+    _athenticatedRequest(path, params={}):
+       authenticated call with APIKey and Secret for Market and Account methods
 
     Notes
     -----
-    Public methods can be run without supplying APIKey or Secret
-    Market and Account methods need APIKey and Secret for authentification
     Market methods need 'ALLOW TRADING' permission set up on the APIKey
     Account methods need 'ALLOW READING' permission set up on the APIKey
-    For more information, see: https://apidocs.txbit.io/#txbit-io-api
     """
     endpoint = 'https://api.txbit.io/api/'
 
-    def __init__(self, APIKey, Secret):
+    def __init__(self, APIKey=None, Secret=None):
         self.APIKey = APIKey
         self.Secret = Secret
 
-    def expandPathToUrl(path, params={}):
+    def _expandPathToUrl(self, path, params={}):
         """adds onto the base url for specific methods"""
-        url = Txbit.endpoint + path
+        url = self.endpoint + path
         url += '?' if params else ''
+        return url + '&'.join([key + '=' + str(params[key]) for key in params])
 
-        for key in params:
-            url += key + '=' + params[key] + '&'
+    def _publicRequest(self, path, params={}):
+        """public call for Public Methods"""
+        url = self._expandPathToUrl(path, params)
+        res = requests.get(url)
 
-        return url
+        return TxbitResponse(res.ok and res.json()['success'],
+                             res.json()['message'],
+                             res.json()['result'])
 
-    def request(path, params={}):
-        """uses `expandPathToUrl()` to make the API call"""
-        url = Txbit.expandPathToUrl(path, params)
-        return requests.get(url)
+    def _authenticatedRequest(self, path, params={}):
+        """authenticated call with APIKey and Secret for Market and Account methods"""
+        if self.APIKey is None or self.Secret is None:
+            raise ValueError('APIKey and Secret must be supplied to use this methods')
 
-    def authenticatedRequest(self, path, params={}):
-        """authenticated API call with APIKey and Secret for Market and Account methods"""
         params['apikey'] = self.APIKey
         params['nonce'] = str(int(time()))
 
-        url = Txbit.expandPathToUrl(path, params)
-
+        url = self._expandPathToUrl(path, params)
         apisign = hmac.new(bytes(self.Secret, 'utf-8'),
                            bytes(url, 'utf-8'),
                            hashlib.sha512).hexdigest().upper()
-
         headers = {'apisign': apisign}
-        return requests.get(url, headers=headers)
+
+        res = requests.get(url, headers=headers)
+
+        return TxbitResponse(res.ok and res.json()['success'],
+                             res.json()['message'],
+                             res.json()['result'])
 
     ## PUBLIC FUNCTIONS ---------------
 
-    def getMarkets():
-        """(P) get the open and available trading markets along with other meta data"""
-        res = Txbit.request('public/getmarkets')
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+    def getMarkets(self):
+        """get the open and available trading markets along with other meta data"""
+        return self._publicRequest('public/getmarkets')
 
-    def getCurrencies():
-        """(P) get all supported assets along with other meta data"""
-        res = Txbit.request('public/getcurrencies')
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+    def getCurrencies(self):
+        """get all supported assets along with other meta data"""
+        return self._publicRequest('public/getcurrencies')
 
-    def getMarketSummaries():
-        """(P) get the last 24 hour summary of all active markets"""
-        res = Txbit.request('public/getmarketsummaries')
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+    def getTicker(self, market):
+        """get current tick values for a market"""
+        params = {'market': market}
+        return self._publicRequest('public/getticker', params)
 
-    def getExchangePairs():
-        """(P) get list of all pairs that form markets"""
-        res = Txbit.getMarketSummaries()
-        res.result = [pair['MarketName'] for pair in res.result]
-        return res
+    def getMarketSummaries(self):
+        """get the last 24 hour summary of all active markets"""
+        return self._publicRequest('public/getmarketsummaries')
 
-    def getSystemStatus():
-        """(P) get the system related status for all currencies"""
-        res = Txbit.request('public/getsystemstatus')
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+    def getMarketSummary(self, market):
+        """get the last 24 hour summary of a specific market"""
+        params = {'market': market}
+        return self._publicRequest('public/getmarketsummary', params)
 
-    def getOrderBook(market, bookType='both'):
-        """(P) get the orderbook for a given market"""
+    def getOrderBook(self, market, bookType='both'):
+        """get the orderbook for a given market"""
         params = {'market': market, 'type': bookType}
-        res = Txbit.request('public/getorderbook', params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._publicRequest('public/getorderbook', params)
 
-    def getTicker(market):
-        """(P) get current tick values for a market"""
+    def getMarketHistory(self, market):
+        """get the latest trades that have occurred for a specific market"""
         params = {'market': market}
-        res = Txbit.request('public/getticker', params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._publicRequest('public/getmarkethistory', params)
 
-    def getMarketHistory(market):
-        """(P) get the latest trades that have occurred for a specific market"""
-        params = {'market': market}
-        res = Txbit.request('public/getmarkethistory', params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+    def getSystemStatus(self):
+        """get the system related status for all currencies"""
+        return self._publicRequest('public/getsystemstatus')
 
-    def getCurrencyInformation(currency):
-        """(P) get specific information and metadata about the listed currency"""
+    def getCurrencyInformation(self, currency):
+        """get specific information and metadata about the listed currency"""
         params = {'currency': currency}
-        res = Txbit.request('public/getcurrencyinformation', params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._publicRequest('public/getcurrencyinformation', params)
 
-    def getCurrencyBalanceSheet(currency):
-        """(P) get solvency information for listed currencies"""
+    def getCurrencyBalanceSheet(self, currency):
+        """get solvency information for listed currencies"""
         params = {'currency': currency}
-        res = Txbit.request('public/getcurrencybalancesheet', params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._publicRequest('public/getcurrencybalancesheet', params)
+
+    ## MARKET FUNCTIONS ---------------
+
+    def buyLimit(self, market, quantity, rate):
+        """place a Buy Limit order in a specific market"""
+        params = {'market': market, 'quantity': quantity, 'rate': rate}
+        return self._authenticatedRequest('market/buylimit', params)
+
+    def sellLimit(self, market, quantity, rate):
+        """place a Sell Limit order in a specific market"""
+        params = {'market': market, 'quantity': quantity, 'rate': rate}
+        return self._authenticatedRequest('market/selllimit', params)
+
+    def cancel(self, uuid):
+        """cancel a buy or sell order"""
+        params = {'uuic': uuic}
+        return self._authenticatedRequest('market/cancel', params)
+
+    def getOpenOrders(self, market=None):
+        """get all orders that you currently have opened"""
+        params = {}
+
+        if market is not None:
+            params['market'] = market
+
+        return self._authenticatedRequest('market/getopenorders', params)
 
     ## ACOUNT FUNCTIONS ---------------
 
     def getBalances(self):
-        """(A) get all balances from your account"""
-        path = 'account/getbalances'
-        res = self.authenticatedRequest(path)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        """get all balances from your account"""
+        return self._authenticatedRequest('account/getbalances')
 
-    def getBalanceFor(self, currency):
-        """(A) get the balance from your account for a specific asset"""
-        path = 'account/getbalance'
+    def getBalance(self, currency):
+        """get the balance from your account for a specific asset"""
         params = {'currency': currency}
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._authenticatedRequest('account/getbalance', params)
 
     def getDepositAddress(self, currency):
-        """(A) get or generate an address for a specific currency
+        """get or generate an address for a specific currency
 
         Notes
         -----
         will return ADDRESS_GENERATING until one is available
         """
-        path = 'account/getdepositaddress'
         params = {'currency': currency}
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._authenticatedRequest('account/getdepositaddress', params)
 
     def withdraw(self, currency, quantity, address, paymentid=None):
-        """(A) withdraw funds from your account
+        """withdraw funds from your account
 
         Notes
         -----
-        account for txfee
+        you must account for txfee
         """
-        path = 'account/withdraw'
         params = {'currency': currency, 'quantity': quantity, 'address': address}
 
         if paymentid is not None:
             params['paymentid'] = paymentid
 
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._authenticatedRequest('account/withdraw', params)
 
     def getOrder(self, uuid):
-        """(A) get a single order by uuid"""
-        path = 'account/getorder'
+        """get a single order by uuid"""
         params = {'uuid': uuid}
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._authenticatedRequest('account/getorder', params)
 
     def getOrderHistory(self, market=None):
-        """(A) get your order history"""
-        path = 'account/getorderhistory'
+        """get your order history"""
         params = {}
 
         if market is not None:
             params['market'] = market
 
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._authenticatedRequest('account/getorderhistory', params)
 
     def getWithdrawlHistory(self, currency=None):
-        """(A) get your withdrawal history"""
-        path = 'account/getwithdrawalhistory'
+        """get your withdrawal history"""
         params = {}
 
         if currency is not None:
             params['currency'] = currency
 
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._authenticatedRequest('account/getwithdrawalhistory', params)
 
     def getDepositHistory(self, currency=None):
-        """(A) get your deposit history"""
-        path = 'account/getdeposithistory'
+        """get your deposit history"""
         params = {}
 
         if currency is not None:
             params['currency'] = currency
 
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
-
-    ## MARKET FUNCTIONS ---------------
-
-    def buyLimit(self, market, quantity, rate):
-        """(M) place a Buy Limit order in a specific market"""
-        path = 'market/buylimit'
-        params = {'market': market, 'quantity': quantity, 'rate': rate}
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
-
-    def sellLimit(self, market, quantity, rate):
-        """(M) place a Sell Limit order in a specific market"""
-        path = 'market/selllimit'
-        params = {'market': market, 'quantity': quantity, 'rate': rate}
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
-
-    def cancel(self, uuid):
-        """(M) cancel a buy or sell order"""
-        path = 'market/cancel'
-        params = {'uuic': uuic}
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
-
-    def getOpenOrders(self, market=None):
-        """(M) get all orders that you currently have opened"""
-        path = 'getopenorders'
-        params = {}
-
-        if market is not None:
-            params['market'] = market
-
-        res = self.authenticatedRequest(path, params)
-        result = res.json()['result'] if res.ok and res.json()['success'] else res.status_code
-        return TxbitResponse(res.ok and res.json()['success'], "", result)
+        return self._authenticatedRequest('account/getdeposithistory', params)
